@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import ru.solon4ak.jm_crudapp.dbService.DBHelper;
 import ru.solon4ak.jm_crudapp.model.User;
 
 /**
@@ -16,9 +17,18 @@ import ru.solon4ak.jm_crudapp.model.User;
 public class UserDao {
 
     private final Connection connection;
+    
+    private static UserDao instance;
 
-    public UserDao(Connection connection) {
-        this.connection = connection;
+    private UserDao() {
+        this.connection = DBHelper.getConnection();
+    }
+    
+    public static UserDao getInstance() {
+        if (instance == null) {
+            instance = new UserDao();
+        }
+        return instance;
     }
 
     public User get(long id) throws SQLException {
@@ -59,40 +69,74 @@ public class UserDao {
     }
 
     public int add(User user) throws SQLException {
+        int result = 0;
         StringBuilder sb = new StringBuilder();
         sb.append("insert into users (first_name, last_name, email, address, phone_number, age) ");
         sb.append("values (?, ?, ?, ?, ?, ?)");
-        PreparedStatement ps = connection.prepareStatement(sb.toString());
-        ps.setString(1, user.getFirstName());
-        ps.setString(2, user.getLastName());
-        ps.setString(3, user.getEmail());
-        ps.setString(4, user.getAddress());
-        ps.setString(5, user.getPhoneNumber());
-        ps.setByte(6, user.getAge());
-        return ps.executeUpdate();
+        try {
+            createTable();
+            connection.setAutoCommit(false);
+            PreparedStatement ps = connection.prepareStatement(sb.toString());
+            ps.setString(1, user.getFirstName());
+            ps.setString(2, user.getLastName());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getAddress());
+            ps.setString(5, user.getPhoneNumber());
+            ps.setByte(6, user.getAge());
+            result = ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+        } finally {
+            connection.setAutoCommit(true);
+        }
+
+        return result;
     }
 
     public int update(User user) throws SQLException {
+        int result = 0;
         StringBuilder sb = new StringBuilder();
         sb.append("update users set first_name=?, last_name=?, email=?, ");
         sb.append("address=?, phone_number=?, age=? ");
         sb.append("where id=?");
-        PreparedStatement ps = connection.prepareStatement(sb.toString());
-        ps.setString(1, user.getFirstName());
-        ps.setString(2, user.getLastName());
-        ps.setString(3, user.getEmail());
-        ps.setString(4, user.getAddress());
-        ps.setString(5, user.getPhoneNumber());
-        ps.setByte(6, user.getAge());
-        ps.setLong(7, user.getId());
-        return ps.executeUpdate();
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement ps = connection.prepareStatement(sb.toString());
+            ps.setString(1, user.getFirstName());
+            ps.setString(2, user.getLastName());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getAddress());
+            ps.setString(5, user.getPhoneNumber());
+            ps.setByte(6, user.getAge());
+            ps.setLong(7, user.getId());
+            result = ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+        } finally {
+            connection.setAutoCommit(true);
+        }
+
+        return result;
     }
 
     public int delete(long id) throws SQLException {
+        int result = 0;
         String query = "delete from users where id=?";
-        PreparedStatement ps = connection.prepareStatement(query);
-        ps.setLong(1, id);
-        return ps.executeUpdate();
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setLong(1, id);
+            result = ps.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+        } finally {
+            connection.setAutoCommit(true);
+        }
+
+        return result;
     }
 
     public void createTable() throws SQLException {
@@ -106,11 +150,11 @@ public class UserDao {
         sb.append("phone_number varchar(15), ");
         sb.append("age TINYINT UNSIGNED, ");
         sb.append("primary key (id))");
-        
-        Statement stmt = connection.createStatement();        
+
+        Statement stmt = connection.createStatement();
         stmt.executeUpdate(sb.toString());
     }
-    
+
     public void clearAll() throws SQLException {
         Statement st = connection.createStatement();
         st.executeUpdate("drop table users");

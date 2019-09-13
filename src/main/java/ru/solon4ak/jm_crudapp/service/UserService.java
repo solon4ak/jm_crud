@@ -1,14 +1,10 @@
 package ru.solon4ak.jm_crudapp.service;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import ru.solon4ak.jm_crudapp.dao.UserDao;
 import ru.solon4ak.jm_crudapp.dbService.DBException;
-import ru.solon4ak.jm_crudapp.dbService.DBHelper;
 import ru.solon4ak.jm_crudapp.model.User;
 
 /**
@@ -18,11 +14,10 @@ import ru.solon4ak.jm_crudapp.model.User;
 public class UserService {
 
     private static UserService userService;
-
-    private Connection connection;
+    
+    private UserDao userDao;
 
     private UserService() {
-        this.connection = DBHelper.getConnection();
     }
 
     public static UserService getInstance() {
@@ -35,7 +30,7 @@ public class UserService {
     public List<User> getAllUsers() throws DBException {
         List<User> users = new ArrayList<>();
         try {
-            UserDao userDao = new UserDao(connection);
+            userDao = UserDao.getInstance();
             users = userDao.getAll();
         } catch (SQLException ex) {
             throw new DBException(ex);
@@ -45,7 +40,7 @@ public class UserService {
 
     public User getUserById(long id) throws DBException {
         try {
-            UserDao userDao = new UserDao(connection);
+            userDao = UserDao.getInstance();
             return userDao.get(id);
         } catch (SQLException ex) {
             throw new DBException(ex);
@@ -53,75 +48,40 @@ public class UserService {
     }
 
     public int addUser(User user) throws DBException {
-        int res = 0;
+        int result = 0;
         try {
-            connection.setAutoCommit(false);
-            UserDao userDao = new UserDao(connection);
-            userDao.createTable();
-            res = userDao.add(user);
-            connection.commit();
+            userDao = UserDao.getInstance();
+            result = userDao.add(user);
         } catch (SQLException ex) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex1) {
-            }
             throw new DBException(ex);
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException ex) {
-            }
         }
-        return res;
+        return result;
     }
     
     public int updateUser(User user) throws DBException {
-        int res = 0;
-        try {
-            connection.setAutoCommit(false);
-            UserDao userDao = new UserDao(connection);
-            userDao.createTable();
-            res = userDao.update(user);
-            connection.commit();
+        int result = 0;
+        try {            
+            userDao = UserDao.getInstance();
+            result = userDao.update(user);
         } catch (SQLException ex) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex1) {
-            }
             throw new DBException(ex);
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException ex) {
-            }
         }
-        return res;
+        return result;
     }
 
     public int deleteUser(long id) throws DBException {
-        int res = 0;
+        int result = 0;
         try {
-            connection.setAutoCommit(false);
-            UserDao userDao = new UserDao(connection);
-            res = userDao.delete(id);
-            connection.commit();
-        } catch (SQLException ex) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex1) {
-            }
+            userDao = UserDao.getInstance();
+            result = userDao.delete(id);
+        } catch (SQLException ex) {            
             throw new DBException(ex);
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException ex) {
-            }
         }
-        return res;
+        return result;
     }
 
     public void ClearData() throws DBException {
-        UserDao userDao = new UserDao(connection);
+        userDao = UserDao.getInstance();
         try {
             userDao.clearAll();
         } catch (SQLException ex) {

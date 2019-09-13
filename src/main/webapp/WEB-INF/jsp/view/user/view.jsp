@@ -36,12 +36,11 @@
                 </tr>
             </tbody>
         </table>
+        <br />
 
         <a href="<c:url value="edit">
                <c:param name="id" value="${user.id}" />
-           </c:url>"></a>     
-        <br />
-        <br />
-        <a href="<c:url value="list" />">List all</a>
+           </c:url>">Edit</a> / 
+           <a href="<c:url value="list" />">List all</a>
     </body>
 </html>
