@@ -8,9 +8,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import ru.solon4ak.jm_crudapp.dbService.DBException;
+import ru.solon4ak.jm_crudapp.util.DBException;
 import ru.solon4ak.jm_crudapp.model.User;
 import ru.solon4ak.jm_crudapp.service.UserService;
+import ru.solon4ak.jm_crudapp.service.UserServiceImpl;
 
 /**
  *
@@ -19,38 +20,36 @@ import ru.solon4ak.jm_crudapp.service.UserService;
 @WebServlet(name = "AddUserServlet", urlPatterns = {"/add"})
 public class AddUserServlet extends HttpServlet {
 
-    private UserService userService = UserService.getInstance();
+    private final UserService userService = UserServiceImpl.getInstance();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String firstName = req.getParameter("firstName");
-        String lastName = req.getParameter("lastName");
-        String email = req.getParameter("email");
-        String address = req.getParameter("address");
-        String phoneNumber = req.getParameter("phoneNumber");
-        String age = req.getParameter("age");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        User user = new User(
+                req.getParameter("firstName"), 
+                req.getParameter("lastName"), 
+                req.getParameter("email"), 
+                req.getParameter("address"), 
+                req.getParameter("phoneNumber"), 
+                Byte.valueOf(req.getParameter("age")));
         
-        User user = new User(firstName, lastName, email, address, phoneNumber, Byte.valueOf(age));
         try {
-            int res = userService.addUser(user);
-            if (res != 0) {
-                req.setAttribute("user", user);
-                req.getRequestDispatcher("/WEB-INF/jsp/view/user/view.jsp").forward(req, resp);
-            } else {
-                resp.sendRedirect("/list");
-            }
+            userService.addUser(user);
+            req.setAttribute("user", user);
+            resp.setStatus(200);
+            req.getRequestDispatcher("/WEB-INF/jsp/view/user/view.jsp").forward(req, resp);
         } catch (DBException ex) {
+            resp.setStatus(400);
             Logger.getLogger(AddUserServlet.class.getName())
                     .log(Level.SEVERE, "Exception while adding user.", ex);
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.getRequestDispatcher("/WEB-INF/jsp/view/user/add.jsp").forward(req, resp);
     }
-    
-    
 
 }

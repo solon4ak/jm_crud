@@ -1,4 +1,4 @@
-package ru.solon4ak.jm_crudapp.dbService;
+package ru.solon4ak.jm_crudapp.util;
 
 /**
  *

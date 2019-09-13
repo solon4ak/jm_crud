@@ -8,6 +8,12 @@
     </head>
     <body>
         <h2>View user</h2>
+        <a href="<c:url value="edit">
+               <c:param name="id" value="${user.id}" />
+           </c:url>">Edit</a> / 
+        <a href="<c:url value="list" />">List all</a>
+        <br />
+        <br />
         <table border="0" width="300" cellpadding="5">
             <tbody>
                 <tr>
@@ -35,12 +41,11 @@
                     <td>${user.age}</td>
                 </tr>
             </tbody>
-        </table>
+        </table>  
         <br />
-
-        <a href="<c:url value="edit">
-               <c:param name="id" value="${user.id}" />
-           </c:url>">Edit</a> / 
-           <a href="<c:url value="list" />">List all</a>
+        <form action="delete" method="post">
+            <input type="hidden" name="id" value="${user.id}" />
+            <input type="submit" value="delete" />
+        </form>
     </body>
 </html>

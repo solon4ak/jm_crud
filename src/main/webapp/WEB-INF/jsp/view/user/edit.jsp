@@ -9,7 +9,7 @@
     <body>
         <h2>Edit user</h2>
         <form action="edit" method="post">
-            <input type="hidden" name="id" value="${user.id}">
+            <input type="hidden" name="id" value="${user.id}" />
             <table border="0" width="300" cellpadding="5">
                 <tbody>
                     <tr>

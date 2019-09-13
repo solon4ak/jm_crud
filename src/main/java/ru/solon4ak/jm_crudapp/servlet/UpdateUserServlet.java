@@ -9,9 +9,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import ru.solon4ak.jm_crudapp.dbService.DBException;
+import ru.solon4ak.jm_crudapp.util.DBException;
 import ru.solon4ak.jm_crudapp.model.User;
 import ru.solon4ak.jm_crudapp.service.UserService;
+import ru.solon4ak.jm_crudapp.service.UserServiceImpl;
 
 /**
  *
@@ -20,54 +21,33 @@ import ru.solon4ak.jm_crudapp.service.UserService;
 @WebServlet(name = "UpdateUserServlet", urlPatterns = {"/edit"})
 public class UpdateUserServlet extends HttpServlet {
 
-    private UserService userService = UserService.getInstance();
+    private final UserService userService = UserServiceImpl.getInstance();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
-        String firstName = req.getParameter("firstName");
-        String lastName = req.getParameter("lastName");
-        String email = req.getParameter("email");
-        String address = req.getParameter("address");
-        String phoneNumber = req.getParameter("phoneNumber");
-        String age = req.getParameter("age");
-        String idString = req.getParameter("id");
+        long id = Long.parseLong(req.getParameter("id"));
 
         try {
-            long id = Long.parseLong(idString);
-            System.out.println("Id long: " + id);
-            try {
-                User user = userService.getUserById(id);
-                if (user != null) {
-                    user.setFirstName(firstName);
-                    user.setLastName(lastName);
-                    user.setEmail(email);
-                    user.setAddress(address);
-                    user.setPhoneNumber(phoneNumber);
-                    user.setAge(Byte.valueOf(age));
+            User user = userService.getUserById(id);
 
-                    int res = userService.updateUser(user);
-                    if (res != 0) {
-                        req.setAttribute("user", user);
-                        resp.setStatus(200);
-                        req.getRequestDispatcher("/WEB-INF/jsp/view/user/view.jsp").forward(req, resp);
-                    } else {
-                        resp.setStatus(400);
-                        req.setAttribute("users", (List<User>) userService.getAllUsers());
-                        req.getRequestDispatcher("/WEB-INF/jsp/view/user/list.jsp").forward(req, resp);
-                    }
+            user.setFirstName(req.getParameter("firstName"));
+            user.setLastName(req.getParameter("lastName"));
+            user.setEmail(req.getParameter("email"));
+            user.setAddress(req.getParameter("address"));
+            user.setPhoneNumber(req.getParameter("phoneNumber"));
+            user.setAge(Byte.valueOf(req.getParameter("age")));
 
-                } else {
-                    req.setAttribute("users", (List<User>) userService.getAllUsers());
-                    req.getRequestDispatcher("/WEB-INF/jsp/view/user/list.jsp").forward(req, resp);
-                }
-            } catch (DBException ex) {
-                Logger.getLogger(UpdateUserServlet.class.getName())
-                        .log(Level.SEVERE, "Exception while updating user.", ex);
-            }
-        } catch (NumberFormatException e) {
+            userService.updateUser(user);
+
+            req.setAttribute("user", user);
+            resp.setStatus(200);
+            req.getRequestDispatcher("/WEB-INF/jsp/view/user/view.jsp").forward(req, resp);
+        } catch (DBException ex) {
+            resp.setStatus(400);
             Logger.getLogger(UpdateUserServlet.class.getName())
-                    .log(Level.SEVERE, "Wrong id argument.", e);
+                    .log(Level.SEVERE, "Exception while updating user.", ex);
         }
     }
 
@@ -76,30 +56,17 @@ public class UpdateUserServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String idString = req.getParameter("id");
-        System.out.println("Id string: " + idString);
+        long id = Long.parseLong(idString);
 
-        if (!idString.isEmpty() && !"".equals(idString)) {
-            try {
-                long id = Long.parseLong(idString);
-                System.out.println("Id long: " + id);
-                try {
-                    User user = userService.getUserById(id);
-
-                    if (user != null) {
-                        req.setAttribute("user", user);
-                        req.getRequestDispatcher("/WEB-INF/jsp/view/user/edit.jsp").forward(req, resp);
-                    } else {
-                        req.setAttribute("users", (List<User>) userService.getAllUsers());
-                        req.getRequestDispatcher("/WEB-INF/jsp/view/user/list.jsp").forward(req, resp);
-                    }
-                } catch (DBException ex) {
-                    Logger.getLogger(UpdateUserServlet.class.getName())
-                            .log(Level.SEVERE, "Exception while updating user.", ex);
-                }
-            } catch (NumberFormatException e) {
-                Logger.getLogger(UpdateUserServlet.class.getName())
-                        .log(Level.SEVERE, "Wrong id argument.", e);
-            }
+        try {
+            User user = userService.getUserById(id);
+            req.setAttribute("user", user);
+            resp.setStatus(200);
+            req.getRequestDispatcher("/WEB-INF/jsp/view/user/edit.jsp").forward(req, resp);
+        } catch (DBException ex) {
+            resp.setStatus(400);
+            Logger.getLogger(UpdateUserServlet.class.getName())
+                    .log(Level.SEVERE, "Exception while updating user.", ex);
         }
     }
 

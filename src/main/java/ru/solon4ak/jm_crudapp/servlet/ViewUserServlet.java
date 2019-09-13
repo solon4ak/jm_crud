@@ -9,9 +9,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import ru.solon4ak.jm_crudapp.dbService.DBException;
+import ru.solon4ak.jm_crudapp.util.DBException;
 import ru.solon4ak.jm_crudapp.model.User;
-import ru.solon4ak.jm_crudapp.service.UserService;
+import ru.solon4ak.jm_crudapp.service.UserServiceImpl;
 
 /**
  *
@@ -20,34 +20,23 @@ import ru.solon4ak.jm_crudapp.service.UserService;
 @WebServlet(name = "ViewUserServlet", urlPatterns = {"/view"})
 public class ViewUserServlet extends HttpServlet {
 
-    private UserService userService = UserService.getInstance();
+    private UserServiceImpl userService = UserServiceImpl.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String idString = req.getParameter("id");
-        System.out.println("Id string: " + idString);
+        long id = Long.parseLong(idString);
 
-        if (!idString.isEmpty() && !"".equals(idString)) {
-            try {
-                long id = Long.parseLong(idString);
-                System.out.println("Id long: " + id);
-                try {
-                    User user = userService.getUserById(id);
-                    if (user != null) {
-                        req.setAttribute("user", user);
-                        req.getRequestDispatcher("/WEB-INF/jsp/view/user/view.jsp").forward(req, resp);
-                    } else {
-                        resp.sendRedirect("/list");
-                    }
-                } catch (DBException ex) {
-                    Logger.getLogger(DeleteUserServlet.class.getName())
-                            .log(Level.SEVERE, "Exception while retrieving user.", ex);
-                }
-            } catch (NumberFormatException e) {
-                Logger.getLogger(DeleteUserServlet.class.getName())
-                        .log(Level.SEVERE, "Wrong id argument.", e);
-            }
+        try {
+            User user = userService.getUserById(id);
+            req.setAttribute("user", user);
+            resp.setStatus(200);
+            req.getRequestDispatcher("/WEB-INF/jsp/view/user/view.jsp").forward(req, resp);
+        } catch (DBException ex) {
+            resp.setStatus(400);
+            Logger.getLogger(DeleteUserServlet.class.getName())
+                    .log(Level.SEVERE, "Exception while retrieving user.", ex);
         }
     }
 

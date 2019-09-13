@@ -49,12 +49,6 @@
                                            <c:param name="id" value="${user.id}" />
                                        </c:url>">
                                         Edit
-                                    </a> 
-                                    / 
-                                    <a href="<c:url value="delete">
-                                           <c:param name="id" value="${user.id}" />
-                                       </c:url>">
-                                        Delete
                                     </a>
                                 </td>
                             </tr>
@@ -65,9 +59,6 @@
 
             </c:otherwise>
         </c:choose>
-        <a href="<c:url value="list?clear" />">Delete all users</a>
-        <br />
-        <br />
         <a href="<c:url value="add" />">Add user</a>
     </body>
 </html>
