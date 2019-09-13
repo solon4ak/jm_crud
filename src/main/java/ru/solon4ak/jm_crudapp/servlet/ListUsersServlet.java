@@ -24,23 +24,6 @@ public class ListUsersServlet extends HttpServlet {
 
     private static final UserService userService = UserService.getInstance();
 
-    private static final List<User> users = new ArrayList<>();
-
-    static {
-        users.add(new User("Marcy", "Bloom", "marcy@dot.com", null, null, Byte.valueOf("19")));
-        users.add(new User("Mary", "Sanders", "mary@dot.com", null, null, Byte.valueOf("21")));
-        users.add(new User("Edvard", "Norton", "ed@dot.com", null, null, Byte.valueOf("24")));
-
-        users.forEach((user) -> {
-            try {
-                userService.addUser(user);
-            } catch (DBException ex) {
-                Logger.getLogger(ListUsersServlet.class.getName())
-                        .log(Level.SEVERE, "DBException rised while static adding users", ex);
-            }
-        });
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
